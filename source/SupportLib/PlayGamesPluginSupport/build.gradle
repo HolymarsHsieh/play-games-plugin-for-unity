@@ -3,20 +3,24 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.7.+'
+        classpath 'com.android.tools.build:gradle:0.9+'
     }
 }
 apply plugin: 'android-library'
 
 repositories {
     mavenCentral()
+    flatDir {
+        dirs 'ext_lib'
+    }
 }
 
 android {
     compileSdkVersion 19
-    buildToolsVersion "17.0.0"
+    buildToolsVersion "19.0.0"
 }
 
 dependencies {
+    compile(name:'google-play-services-gamestester-5029600', ext:'aar')
     compile project(':BaseGameUtils')
 }

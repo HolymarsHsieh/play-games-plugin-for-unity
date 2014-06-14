@@ -562,7 +562,19 @@ namespace GooglePlayGames.Android {
             // Not necessary in Android (since the library takes care of storing
             // data locally)
         }
-        
+
+        public void StartSelectSnapshotActivity(string title, bool allowAdd, bool allowDelete,
+                int maxSnapshots, OnSnapshotResultListener listener) {
+            Logger.d("AndroidClient.StartSelectSnapshotActivity");
+
+            CallClientApi("select snapshot ui", () => {
+                AndroidJavaClass klass = JavaUtil.GetClass(
+                    JavaConsts.SupportSelectSnapshotHelperActivity);
+                klass.CallStatic("launch", GetActivity(), new SelectSnapshotProxy(this, listener),
+                                 title, allowAdd, allowDelete, maxSnapshots);
+            }, null);
+        }
+
         // called from game thread
         public void RegisterInvitationDelegate(InvitationReceivedDelegate deleg) {
             Logger.d("AndroidClient.RegisterInvitationDelegate");

@@ -72,6 +72,10 @@ namespace GooglePlayGames.Android {
         public const string SupportInvitationInboxHelperActivityListener =
             SupportInvitationInboxHelperActivity + "$Listener";
         public const string SignInHelperManagerClass = PluginSupportPkg + ".SignInHelperManager";
+        public const string SupportSelectSnapshotHelperActivity = PluginSupportPkg +
+            ".SelectSnapshotHelperActivity";
+        public const string SupportSelectSnapshotHelperActivityListener =
+            SupportSelectSnapshotHelperActivity + "$Listener";
         
         // participant status
         public const int STATUS_NOT_INVITED_YET = 0;
@@ -111,6 +115,7 @@ namespace GooglePlayGames.Android {
         public const int MATCH_RESULT_NONE = 3;
         public const int MATCH_RESULT_DISCONNECT = 4;
         public const int MATCH_RESULT_DISAGREED = 5;
+
     }
 }
 #endif

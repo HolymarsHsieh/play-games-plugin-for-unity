@@ -21,6 +21,8 @@
             	android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" />
         <activity android:name="com.google.example.games.pluginsupport.InvitationInboxHelperActivity"
                 android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" />
+        <activity android:name="com.google.example.games.pluginsupport.SelectSnapshotHelperActivity"
+                android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" />
     </application> 
 </manifest>
 
