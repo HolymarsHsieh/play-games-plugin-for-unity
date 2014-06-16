@@ -6,14 +6,19 @@ using GooglePlayGames.OurUtils;
 
 namespace GooglePlayGames.Android {
     internal class OnSnapshotResultProxy : AndroidJavaProxy {
-        private AndroidClient mClient;
-        private OnSnapshotResultListener mListener;
+        protected AndroidClient mClient;
+        protected OnSnapshotResultListener mListener;
 
         internal OnSnapshotResultProxy(AndroidClient client, OnSnapshotResultListener listener) :
             base(JavaConsts.ResultCallbackClass) {
             mClient = client;
             mListener = listener;
         }
+    }
+
+    internal class OnOpenResultProxy : OnSnapshotResultProxy {
+        internal OnOpenResultProxy(AndroidClient client, OnSnapshotResultListener listener) :
+            base(client, listener) {}
 
         private void resolveConflict(string conflictId, SnapshotAndroid r)
         {
@@ -25,15 +30,15 @@ namespace GooglePlayGames.Android {
 
         public void onResult(AndroidJavaObject result)
         {
-            Logger.d("OnStateResultProxy.onResult, result=" + result);
-            
-            int statusCode = JavaUtil.GetStatusCode(result);
-            Logger.d("OnStateResultProxy: status code is " + statusCode);
+            Logger.d("OnOpenResultProxy.onResult, result=" + result);
 
             if (result == null) {
-                Logger.e("OnStateResultProxy: result is null.");
+                Logger.e("OnOpenResultProxy: result is null.");
                 return;
             }
+
+            int statusCode = JavaUtil.GetStatusCode(result);
+            Logger.d("OnOpenResultProxy: status code is " + statusCode);
 
             AndroidJavaObject openedResult =
                 JavaUtil.CallNullSafeObjectMethod(result, "getSnapshot");
@@ -46,7 +51,7 @@ namespace GooglePlayGames.Android {
                 conflict = new SnapshotAndroid(mClient, conflictResult);
                 string conflictId = result.Call<string>("getConflictId");
                 if (mListener != null) {
-                    Logger.d("OnSnapshotResultProxy.onResult invoke conflict callback.");
+                    Logger.d("OnOpenResultProxy.onResult invoke conflict callback.");
                     PlayGamesHelperObject.RunOnGameThread(() => {
                         SnapshotAndroid r = mListener.OnSnapshotConflict(conflict, opened) as SnapshotAndroid;
                         resolveConflict(conflictId, r);
@@ -55,21 +60,45 @@ namespace GooglePlayGames.Android {
             } else if(openedResult != null) {
                 opened = new SnapshotAndroid(mClient, openedResult);
                 if (mListener != null) {
-                    Logger.d("OnSnapshotResultProxy.onResult invoke opened callback.");
+                    Logger.d("OnOpenResultProxy.onResult invoke opened callback.");
                     PlayGamesHelperObject.RunOnGameThread(() => {
                         mListener.OnSnapshotOpened(statusCode, opened);
                     });
                 }
             } else {
-                Logger.d("OnSnapshotResultProxy: both openedResult and conflictResult are null!");
+                Logger.d("OnOpenResultProxy: both openedResult and conflictResult are null!");
                 if (mListener != null) {
-                    Logger.d("OnSnapshotResultProxy.onResult invoke fail callback.");
+                    Logger.d("OnOpenResultProxy.onResult invoke fail callback.");
                     PlayGamesHelperObject.RunOnGameThread(() => {
                         mListener.OnSnapshotOpened(statusCode, null);
                     });
                 }
             }
         
+        }
+    }
+
+    internal class OnCommitResultProxy : OnSnapshotResultProxy {
+        internal OnCommitResultProxy(AndroidClient client, OnSnapshotResultListener listener) :
+            base(client, listener) {}
+
+        public void onResult(AndroidJavaObject result) {
+            Logger.d("OnCommitResultProxy.onResult, result=" + result);
+            
+            if (result == null) {
+                Logger.e("OnCommitResultProxy: result is null.");
+                return;
+            }
+            
+            int statusCode = JavaUtil.GetStatusCode(result);
+            Logger.d("OnCommitResultProxy: status code is " + statusCode);
+
+            if(mListener != null) {
+                Logger.d("OnCommitResultProxy.onResult invoke callback.");
+                PlayGamesHelperObject.RunOnGameThread(() => {
+                    mListener.OnSnapshotCommitted(statusCode);
+                });
+            }
         }
     }
 
@@ -104,17 +133,63 @@ namespace GooglePlayGames.Android {
             mClient.CallClientApi("open snapshot metadata", () => {
                 mClient.GHManager.CallGmsApiWithResult(
                     "games.Games", "Snapshots", "load", 
-                    new OnSnapshotResultProxy(mClient, listener), mMetaObj
+                    new OnOpenResultProxy(mClient, listener), mMetaObj
                 );
             }, null);
+        }
+
+        public override SnapshotMetadataChange.Builder change() {
+            return new SnapshotMetadataChangeAndroid.Builder();
+        }
+
+        public override string getDescription() {
+            return mMetaObj.Call<string>("getDescription");
+        }
+
+        public override long getDuration() {
+            return mMetaObj.Call<long>("getDuration");
+        }
+
+        public override long getLastModifiedTimestamp() {
+            return mMetaObj.Call<long>("getLastModifiedTimestamp");
         }
     }
 
     internal class SnapshotMetadataChangeAndroid : SnapshotMetadataChange {
-        private AndroidClient mClient;
+        internal new class Builder : SnapshotMetadataChange.Builder {
+            private AndroidJavaObject mObj;
+
+            public Builder() {
+                mObj = new AndroidJavaObject(JavaConsts.SnapshotMetadataChangeBuilderClass);
+            }
+
+            public override SnapshotMetadataChange.Builder setCoverImage(string path) {
+                AndroidJavaObject bitmap = JavaUtil.GetBitmapFromPath(path);
+                if(bitmap != null)
+                    mObj = mObj.Call<AndroidJavaObject>("setCoverImage", bitmap);                 
+                return this;
+            }
+            public override SnapshotMetadataChange.Builder setDescription(string description) {
+                mObj = mObj.Call<AndroidJavaObject>("setDescription", description);
+                return this;
+            }
+            public override SnapshotMetadataChange.Builder SettingsDurationMillis(long durationMillis) {
+                mObj = mObj.Call<AndroidJavaObject>("setDurationMillis", durationMillis);
+                return this;
+            }
+
+            public override SnapshotMetadataChange build() {
+                return new SnapshotMetadataChangeAndroid(mObj.Call<AndroidJavaObject>("build"));
+            }
+        }
+
         private AndroidJavaObject mChangeObj;
 
         public AndroidJavaObject javaObj() { return mChangeObj; }
+
+        internal SnapshotMetadataChangeAndroid(AndroidJavaObject obj) {
+            mChangeObj = obj;
+        }
     }
 
     internal class SnapshotAndroid : Snapshot {
@@ -135,7 +210,7 @@ namespace GooglePlayGames.Android {
             mClient.CallClientApi("open snapshot metadata", () => {
                 mClient.GHManager.CallGmsApiWithResult(
                     "games.Games", "Snapshots", "commitAndClose", 
-                    new OnSnapshotResultProxy(mClient, listener),
+                    new OnCommitResultProxy(mClient, listener),
                     mObj, change.javaObj()
                     );
             }, null);
@@ -147,6 +222,22 @@ namespace GooglePlayGames.Android {
                     "games.Games", "Snapshots", "discardAndClose", mObj
                 );
             }, null);
+        }
+
+        public override byte[] readFully()
+        {
+            AndroidJavaObject byteArrayObj =
+                mClient.GHManager.CallGmsApi<AndroidJavaObject> (
+                    "games.Games", "Snapshots", "readFully", mObj
+                    );
+
+            return JavaUtil.ConvertByteArray(byteArrayObj);
+        }
+
+        public override bool writeBytes(byte[] content)
+        {
+            return mClient.GHManager.CallGmsApi<bool>(
+                "games.Games", "Snapshots", "writeBytes", mObj, content);
         }
     }
 }

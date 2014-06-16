@@ -84,6 +84,9 @@ namespace GooglePlayGames.BasicApi {
 
         public void UpdateState(int slot, byte[] data, OnStateLoadedListener listener) {}
 
+        public void StartSelectSnapshotActivity(string title, bool allowAdd, bool allowDelete,
+                                           int maxSnapshots, OnSnapshotResultListener listener) {}
+
         public void SetCloudCacheEncrypter(BufferEncrypter encrypter) {}
         
         public Multiplayer.IRealTimeMultiplayerClient GetRtmpClient() { return null; }

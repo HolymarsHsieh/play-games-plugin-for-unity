@@ -28,7 +28,7 @@ namespace GooglePlayGames.Android {
                 new Dictionary<string, AndroidJavaClass>();
         private static Dictionary<string, AndroidJavaObject> mFieldDict = 
                 new Dictionary<string, AndroidJavaObject>();
-        
+
         public static AndroidJavaClass GetGmsClass(string className) {
             return GetClass(JavaConsts.GmsPkg + "." + className);
         }
@@ -94,7 +94,14 @@ namespace GooglePlayGames.Android {
                 return null;
             }
 
-            return AndroidJNI.FromByteArray(byteArrayObj.GetRawObject());
+            byte[] ret = AndroidJNI.FromByteArray(byteArrayObj.GetRawObject());
+            AndroidJNI.DeleteLocalRef(byteArrayObj.GetRawObject());
+            return ret;
+        }
+
+        public static AndroidJavaObject GetBitmapFromPath(string path) {
+            AndroidJavaClass factory = new AndroidJavaClass("android.graphics.BitmapFactory");
+            return factory.CallStatic<AndroidJavaObject>("decodeFile", path);
         }
         
         public static int GetAndroidParticipantResult(MatchOutcome.ParticipantResult result) {

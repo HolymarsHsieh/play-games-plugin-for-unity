@@ -95,7 +95,10 @@ namespace GooglePlayGames.BasicApi {
 
         // Save state to cloud
         void UpdateState(int slot, byte[] data, OnStateLoadedListener listener);
-        
+
+        void StartSelectSnapshotActivity(string title, bool allowAdd, bool allowDelete,
+                                         int maxSnapshots, OnSnapshotResultListener listener);
+
         // Return a real-time multiplayer client
         Multiplayer.IRealTimeMultiplayerClient GetRtmpClient();
         
