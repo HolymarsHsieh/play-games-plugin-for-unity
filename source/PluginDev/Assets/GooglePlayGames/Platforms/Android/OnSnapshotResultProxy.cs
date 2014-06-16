@@ -113,8 +113,11 @@ namespace GooglePlayGames.Android {
 
         public void OnSelectSnapshotResult(bool success, AndroidJavaObject metadata, bool isNew)
         {
-            SnapshotMetadataAndroid meta = new SnapshotMetadataAndroid(mClient, metadata);
-            mListener.OnSelectSnapshotResult(success, meta, isNew);
+            if(mListener != null) {
+                Logger.d("SelectSnapshotProxy.OnSelectSnapshotResult invoke callback.");
+                SnapshotMetadataAndroid meta = success ? new SnapshotMetadataAndroid(mClient, metadata) :  null;
+                mListener.OnSelectSnapshotResult(success, meta, isNew);
+            } 
         }
     }
 
@@ -173,7 +176,7 @@ namespace GooglePlayGames.Android {
                 mObj = mObj.Call<AndroidJavaObject>("setDescription", description);
                 return this;
             }
-            public override SnapshotMetadataChange.Builder SettingsDurationMillis(long durationMillis) {
+            public override SnapshotMetadataChange.Builder setDurationMillis(long durationMillis) {
                 mObj = mObj.Call<AndroidJavaObject>("setDurationMillis", durationMillis);
                 return this;
             }

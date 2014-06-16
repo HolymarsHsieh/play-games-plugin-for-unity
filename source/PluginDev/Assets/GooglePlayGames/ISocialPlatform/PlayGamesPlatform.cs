@@ -590,6 +590,18 @@ namespace GooglePlayGames {
             mClient.UpdateState(slot, data, listener);
         }
 
+        public void StartSelectSnapshotActivity(string title, bool allowAdd, bool allowDelete,
+                                                int maxSnapshots, OnSnapshotResultListener listener) {
+            if (!IsAuthenticated()) {
+                Logger.e("StartSelectSnapshotActivity can only be called after authentication.");
+                if (listener != null) {
+                    listener.OnSelectSnapshotResult(false, null, false);
+                }
+                return;
+            }
+            mClient.StartSelectSnapshotActivity(title, allowAdd, allowDelete, maxSnapshots, listener);
+        }
+
         /// <summary>
         /// Gets the local user.
         /// </summary>

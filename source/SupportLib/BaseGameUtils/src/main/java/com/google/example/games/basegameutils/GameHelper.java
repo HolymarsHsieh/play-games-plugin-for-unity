@@ -38,6 +38,7 @@ import com.google.android.gms.games.multiplayer.Invitation;
 import com.google.android.gms.games.multiplayer.Multiplayer;
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch;
 import com.google.android.gms.plus.Plus;
+import com.google.android.gms.drive.Drive;
 
 public class GameHelper implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
@@ -242,6 +243,7 @@ public class GameHelper implements GoogleApiClient.ConnectionCallbacks,
             }
             builder.addApi(Games.API, options);
             builder.addScope(Games.SCOPE_GAMES);
+            builder.addScope(Drive.SCOPE_APPFOLDER);
         }
 
         if (0 != (mRequestedClients & CLIENT_PLUS)) {
