@@ -10,6 +10,8 @@ namespace GooglePlayGames.BasicApi {
 
     public abstract class SnapshotMetadata {
         public abstract void open(OnSnapshotResultListener listener);
+        public abstract void open(OnSnapshotResultListener listener,
+                                  string fileName, bool createIfNotFound);
         public abstract SnapshotMetadataChange.Builder change();
         public abstract string getDescription();
         public abstract long getDuration();
@@ -21,7 +23,7 @@ namespace GooglePlayGames.BasicApi {
             public abstract SnapshotMetadataChange build();
             public abstract Builder setCoverImage(string path);
             public abstract Builder setDescription(string description);
-            public abstract Builder SettingsDurationMillis(long durationMillis);
+            public abstract Builder setDurationMillis(long durationMillis);
         }
     }
 }

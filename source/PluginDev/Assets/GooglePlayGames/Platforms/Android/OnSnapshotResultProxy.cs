@@ -24,7 +24,7 @@ namespace GooglePlayGames.Android {
         {
             mClient.CallClientApi("open snapshot metadata", () => {
                 mClient.GHManager.CallGmsApiWithResult("games.Games", "Snapshots", "resolveConflict", 
-                 new OnSnapshotResultProxy(mClient, mListener), conflictId, r.javaObj());
+                    new OnOpenResultProxy(mClient, mListener), conflictId, r.javaObj());
             }, null);
         }
 
@@ -47,8 +47,10 @@ namespace GooglePlayGames.Android {
 
             Snapshot opened = null;
             Snapshot conflict = null;
+
             if(conflictResult != null) {
                 conflict = new SnapshotAndroid(mClient, conflictResult);
+                opened = new SnapshotAndroid(mClient, openedResult);
                 string conflictId = result.Call<string>("getConflictId");
                 if (mListener != null) {
                     Logger.d("OnOpenResultProxy.onResult invoke conflict callback.");
@@ -135,9 +137,21 @@ namespace GooglePlayGames.Android {
 
             mClient.CallClientApi("open snapshot metadata", () => {
                 mClient.GHManager.CallGmsApiWithResult(
-                    "games.Games", "Snapshots", "load", 
+                    "games.Games", "Snapshots", "open", 
                     new OnOpenResultProxy(mClient, listener), mMetaObj
                 );
+            }, null);
+        }
+
+        public override void open(OnSnapshotResultListener listener,
+                                  string fileName, bool createIfNotFound) {
+            Logger.d("SnapshotMetadataAndroid.open");
+            
+            mClient.CallClientApi("open snapshot metadata", () => {
+                mClient.GHManager.CallGmsApiWithResult(
+                    "games.Games", "Snapshots", "open", 
+                    new OnOpenResultProxy(mClient, listener), fileName, createIfNotFound
+                    );
             }, null);
         }
 
@@ -210,7 +224,7 @@ namespace GooglePlayGames.Android {
                                             SnapshotMetadataChange metadataChange) {
             var change = metadataChange as SnapshotMetadataChangeAndroid;
 
-            mClient.CallClientApi("open snapshot metadata", () => {
+            mClient.CallClientApi("Commit snapshot", () => {
                 mClient.GHManager.CallGmsApiWithResult(
                     "games.Games", "Snapshots", "commitAndClose", 
                     new OnCommitResultProxy(mClient, listener),
@@ -220,7 +234,7 @@ namespace GooglePlayGames.Android {
         }
 
         public override void discardAndClose() {
-            mClient.CallClientApi("open snapshot metadata", () => {
+            mClient.CallClientApi("discard snapshot", () => {
                 mClient.GHManager.CallGmsApi(
                     "games.Games", "Snapshots", "discardAndClose", mObj
                 );
@@ -230,17 +244,16 @@ namespace GooglePlayGames.Android {
         public override byte[] readFully()
         {
             AndroidJavaObject byteArrayObj =
-                mClient.GHManager.CallGmsApi<AndroidJavaObject> (
-                    "games.Games", "Snapshots", "readFully", mObj
-                    );
+                JavaUtil.GetGmsField("games.Games", "Snapshots")
+                    .Call<AndroidJavaObject>("readFully", mObj);
 
             return JavaUtil.ConvertByteArray(byteArrayObj);
         }
 
         public override bool writeBytes(byte[] content)
         {
-            return mClient.GHManager.CallGmsApi<bool>(
-                "games.Games", "Snapshots", "writeBytes", mObj, content);
+            return JavaUtil.GetGmsField("games.Games", "Snapshots")
+                .Call<bool>("writeBytes", mObj, content);
         }
     }
 }

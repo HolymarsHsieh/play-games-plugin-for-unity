@@ -57,7 +57,7 @@ namespace GooglePlayGames.Android {
         public const string ParticipantResultClass = 
                 GmsPkg + ".games.multiplayer.ParticipantResult";
         public const string SnapshotMetadataChangeBuilderClass =
-                GmsPkg + "games.snapshot.SnapshotMetadataChange$Builder";
+                GmsPkg + ".games.snapshot.SnapshotMetadataChange$Builder";
         
         // Plugin support package name
         public const string PluginSupportPkg = "com.google.example.games.pluginsupport";
