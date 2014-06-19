@@ -191,7 +191,7 @@ namespace GooglePlayGames.Android {
                 return this;
             }
             public override SnapshotMetadataChange.Builder setDurationMillis(long durationMillis) {
-                mObj = mObj.Call<AndroidJavaObject>("setDurationMillis", durationMillis);
+                mObj = mObj.Call<AndroidJavaObject>("setPlayedTimeMillis", durationMillis);
                 return this;
             }
 
@@ -206,6 +206,10 @@ namespace GooglePlayGames.Android {
 
         internal SnapshotMetadataChangeAndroid(AndroidJavaObject obj) {
             mChangeObj = obj;
+        }
+
+        public override SnapshotMetadataChange.Builder newBuilder() {
+            return new Builder();
         }
     }
 
@@ -243,17 +247,14 @@ namespace GooglePlayGames.Android {
 
         public override byte[] readFully()
         {
-            AndroidJavaObject byteArrayObj =
-                JavaUtil.GetGmsField("games.Games", "Snapshots")
-                    .Call<AndroidJavaObject>("readFully", mObj);
+            AndroidJavaObject byteArrayObj = mObj.Call<AndroidJavaObject>("readFully");
 
             return JavaUtil.ConvertByteArray(byteArrayObj);
         }
 
         public override bool writeBytes(byte[] content)
         {
-            return JavaUtil.GetGmsField("games.Games", "Snapshots")
-                .Call<bool>("writeBytes", mObj, content);
+            return mObj.Call<bool>("writeBytes", content);
         }
     }
 }

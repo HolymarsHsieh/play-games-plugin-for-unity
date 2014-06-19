@@ -19,6 +19,7 @@ namespace GooglePlayGames.BasicApi {
     }
 
     public abstract class SnapshotMetadataChange {
+        public abstract SnapshotMetadataChange.Builder newBuilder();
         public abstract class Builder {
             public abstract SnapshotMetadataChange build();
             public abstract Builder setCoverImage(string path);

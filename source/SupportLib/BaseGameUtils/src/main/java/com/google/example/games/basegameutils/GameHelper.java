@@ -242,6 +242,7 @@ public class GameHelper implements GoogleApiClient.ConnectionCallbacks,
                 options = Games.GamesOptions.builder().build();
             }
             builder.addApi(Games.API, options);
+            builder.addApi(Drive.API);
             builder.addScope(Games.SCOPE_GAMES);
             builder.addScope(Drive.SCOPE_APPFOLDER);
         }

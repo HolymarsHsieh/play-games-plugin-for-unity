@@ -21,6 +21,6 @@ android {
 }
 
 dependencies {
-    compile(name:'google-play-services-gamestester-5029600', ext:'aar')
+    compile(name:'google-play-services-games140612', ext:'aar')
     compile project(':BaseGameUtils')
 }
